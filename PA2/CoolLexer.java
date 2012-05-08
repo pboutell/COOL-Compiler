@@ -2,6 +2,31 @@
  *  The scanner definition for COOL.
  */
 import java_cup.runtime.Symbol;
+import java.lang.String;
+import java.lang.StringBuilder;
+class FixString {
+	public static String parse_string(String str) {
+		String nStr = str.substring(1, str.length()-1);
+		StringBuilder rStr = new StringBuilder();
+        int x;
+        for (x=0; x<nStr.length(); ++x) {
+            if (nStr.charAt(x) == '\\' && (x++ < nStr.length())) {
+                switch (nStr.charAt(x++)) {
+                    case 'n':  rStr.append('\n'); break;
+					case 't':  rStr.append('\t'); break;
+					case '\\': rStr.append('\\'); break;
+					case '"':  rStr.append('"');  break;
+					default:   rStr.append('\\'); break;
+       		 	}
+				x++;
+    		}
+			else {
+				rStr.append(nStr.charAt(x));
+			}
+		}
+		return rStr.toString();
+	}
+}
 
 
 class CoolLexer implements java_cup.runtime.Scanner {
@@ -22,7 +47,6 @@ class CoolLexer implements java_cup.runtime.Scanner {
     // Max size of string constants
     static int MAX_STR_CONST = 1025;
     // For assembling string constants
-    StringBuffer string_buf = new StringBuffer();
     private int curr_lineno = 1;
     int get_curr_lineno() {
 		return curr_lineno;
@@ -32,7 +56,7 @@ class CoolLexer implements java_cup.runtime.Scanner {
 		filename = AbstractTable.stringtable.addString(fname);
     }
     AbstractSymbol curr_filename() {
-	return filename;
+		return filename;
     }
  
 	private int c_count = 0; 
@@ -79,13 +103,11 @@ class CoolLexer implements java_cup.runtime.Scanner {
 	}
 
 	private boolean yy_eof_done = false;
-	private final int STRING = 2;
 	private final int YYINITIAL = 0;
 	private final int COMMENT = 1;
 	private final int yy_state_dtrans[] = {
 		0,
-		51,
-		111
+		51
 	};
 	private void yybegin (int state) {
 		yy_lexical_state = state;
@@ -314,19 +336,19 @@ class CoolLexer implements java_cup.runtime.Scanner {
 		/* 75 */ YY_NO_ANCHOR,
 		/* 76 */ YY_NO_ANCHOR,
 		/* 77 */ YY_NO_ANCHOR,
-		/* 78 */ YY_NO_ANCHOR,
-		/* 79 */ YY_NOT_ACCEPT,
+		/* 78 */ YY_NOT_ACCEPT,
+		/* 79 */ YY_NO_ANCHOR,
 		/* 80 */ YY_NO_ANCHOR,
 		/* 81 */ YY_NO_ANCHOR,
-		/* 82 */ YY_NO_ANCHOR,
+		/* 82 */ YY_NOT_ACCEPT,
 		/* 83 */ YY_NO_ANCHOR,
-		/* 84 */ YY_NOT_ACCEPT,
+		/* 84 */ YY_NO_ANCHOR,
 		/* 85 */ YY_NO_ANCHOR,
-		/* 86 */ YY_NO_ANCHOR,
+		/* 86 */ YY_NOT_ACCEPT,
 		/* 87 */ YY_NO_ANCHOR,
 		/* 88 */ YY_NO_ANCHOR,
-		/* 89 */ YY_NOT_ACCEPT,
-		/* 90 */ YY_NO_ANCHOR,
+		/* 89 */ YY_NO_ANCHOR,
+		/* 90 */ YY_NOT_ACCEPT,
 		/* 91 */ YY_NO_ANCHOR,
 		/* 92 */ YY_NO_ANCHOR,
 		/* 93 */ YY_NOT_ACCEPT,
@@ -335,19 +357,19 @@ class CoolLexer implements java_cup.runtime.Scanner {
 		/* 96 */ YY_NOT_ACCEPT,
 		/* 97 */ YY_NO_ANCHOR,
 		/* 98 */ YY_NO_ANCHOR,
-		/* 99 */ YY_NOT_ACCEPT,
+		/* 99 */ YY_NO_ANCHOR,
 		/* 100 */ YY_NO_ANCHOR,
 		/* 101 */ YY_NO_ANCHOR,
-		/* 102 */ YY_NOT_ACCEPT,
+		/* 102 */ YY_NO_ANCHOR,
 		/* 103 */ YY_NO_ANCHOR,
 		/* 104 */ YY_NO_ANCHOR,
-		/* 105 */ YY_NOT_ACCEPT,
+		/* 105 */ YY_NO_ANCHOR,
 		/* 106 */ YY_NO_ANCHOR,
 		/* 107 */ YY_NO_ANCHOR,
-		/* 108 */ YY_NOT_ACCEPT,
+		/* 108 */ YY_NO_ANCHOR,
 		/* 109 */ YY_NO_ANCHOR,
 		/* 110 */ YY_NO_ANCHOR,
-		/* 111 */ YY_NOT_ACCEPT,
+		/* 111 */ YY_NO_ANCHOR,
 		/* 112 */ YY_NO_ANCHOR,
 		/* 113 */ YY_NO_ANCHOR,
 		/* 114 */ YY_NO_ANCHOR,
@@ -409,106 +431,100 @@ class CoolLexer implements java_cup.runtime.Scanner {
 		/* 170 */ YY_NO_ANCHOR,
 		/* 171 */ YY_NO_ANCHOR,
 		/* 172 */ YY_NO_ANCHOR,
-		/* 173 */ YY_NO_ANCHOR,
-		/* 174 */ YY_NO_ANCHOR,
-		/* 175 */ YY_NO_ANCHOR,
-		/* 176 */ YY_NO_ANCHOR,
-		/* 177 */ YY_NO_ANCHOR,
-		/* 178 */ YY_NO_ANCHOR
+		/* 173 */ YY_NO_ANCHOR
 	};
 	private int yy_cmap[] = unpackFromString(1,130,
-"43:9,37,39,43,37,40,43:18,37,43,41,43:4,44,3,4,6,8,10,5,11,7,45:10,2,1,12,9" +
-",17,43,16,26,61,25,32,20,19,61,28,18,61:2,21,61,27,23,24,61,29,22,30,35,31," +
-"33,61:3,43,42,43:2,62,43,46,47,48,49,50,36,47,51,52,47:2,53,47,54,55,56,47," +
-"57,58,34,59,38,60,47:3,13,43,14,15,43,0:2")[0];
+"5:8,39:2,41,39:2,4,5:18,39,5,42,5:5,1,3,2,10,12,6,13,9,44:10,8,7,14,11,19,5" +
+",18,28,60,27,34,22,21,60,30,20,60:2,23,60,29,25,26,60,31,24,32,37,33,35,60:" +
+"3,5,43,5:2,61,5,45,46,47,48,49,38,46,50,51,46:2,52,46,53,54,55,46,56,57,36," +
+"58,40,59,46:3,15,5,16,17,5,0:2")[0];
 
-	private int yy_rmap[] = unpackFromString(1,179,
-"0,1:3,2,1,3,4,1:2,5,1:2,6,1:5,7,8,9,1,10,11,1:5,12,13,12:2,1,14,12:9,15,12:" +
-"2,15,12:2,16,17,1:2,14,18,19,20,21,15,22,15:2,10,15:13,23,10,24,25,26,27,28" +
-",29,30,31,32,18,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,17,48,49,50,51" +
-",52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76" +
-",15,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,10" +
-"0,101,102,103,104,105,106,107,108,15,12,109,110,111,112,113,114,115,116,117")[0];
+	private int yy_rmap[] = unpackFromString(1,174,
+"0,1,2,3,1,4,1,5,1:4,6,1:2,7,1:4,8,9,1,10,11,1:5,12,13,12:2,1,14,12:9,15,12:" +
+"2,15,12:2,16,17,18,1,14,19,20,21,15,22,15:15,23,24,25,26,27,28,29,30,31,32," +
+"33,34,35,36,37,38,39,40,41,42,18,43,44,45,46,47,48,49,50,51,52,53,54,55,56," +
+"57,58,59,60,61,62,63,64,65,36,66,67,68,69,70,71,72,73,74,15,75,76,77,78,79," +
+"80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103" +
+",104,105,106,15,12,107,108,109,110,111,112,113,114,115")[0];
 
-	private int yy_nxt[][] = unpackFromString(118,63,
-"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,57,81,128,169,86,171,173,16" +
-"9,130,169:2,175,169:2,177,20,169,58,21,59,22,-1,23,18:2,56,24,168:2,170,168" +
-",172,168,82,126,129,87,174,168:3,176,169,18,-1:69,25,-1:61,55,-1:61,26,-1:7" +
-"5,27,-1:50,28,-1:3,29,-1:71,169,30,169:2,178,169:4,31,169:8,30,-1,169,-1:6," +
-"169:9,31,169:3,178,169:4,-1:18,168:10,131,133,168:7,-1,168,-1:6,135,168:5,1" +
-"31,168:5,133,168:4,135,-1:37,21:2,-1:25,79:40,34,84,79:20,-1:45,24,-1:35,16" +
-"9:19,-1,169,-1:6,169:18,-1:18,169:10,150,169:8,-1,169,-1:6,169:6,150,169:11" +
-",-1,35:38,-1,35:23,-1:18,168:19,-1,168,-1:6,135,168:16,135,1,78:2,80,83,78," +
-"85,78:32,22,78:23,-1,127:3,-1,127:34,-1,127:23,-1,89:41,93,89,34,89:18,-1:1" +
-"8,32,169:18,-1,169,-1:6,169:7,32,169:10,-1:18,62,168:7,137,168:10,-1,168,-1" +
-":6,135,137,168:5,62,168:9,135,-1:18,168:19,21,59,-1:6,135,168:16,135,-1:18," +
-"168:10,161,168:8,-1,168,-1:6,135,168:5,161,168:10,135,-1,78:2,96,83,78,99,7" +
-"8:32,-1,78:23,-1:3,102,-1:2,52,-1:74,169:3,132,134,169:14,-1,169,-1:6,169:8" +
-",132,169:4,134,169:4,-1:18,168,60,168:2,147,168:4,61,168:8,60,-1,168,-1:6,1" +
-"35,168:8,61,168:3,147,168:3,135,-1,78:2,83:2,78,99,78:32,-1,78:23,-1,79:40," +
-"64,84,79:20,-1,127:3,53,127,88,127:32,-1,127:23,-1:18,169,33,169:16,33,-1,1" +
-"69,-1:6,169:18,-1:18,168,63,168:16,63,-1,168,-1:6,135,168:16,135,-1,78:3,83" +
-",78,88,78:32,-1,78:23,-1:18,169:12,36,169:3,36,169:2,-1,169,-1:6,169:18,-1:" +
-"18,168:12,65,168:3,65,168:2,-1,168,-1:6,135,168:16,135,-1,78:3,83,78,99,78:" +
-"32,-1,78:23,-1,89:38,-1:2,89:22,-1:18,169:15,37,169:3,-1,169,-1:6,169:15,37" +
-",169:2,-1:18,168:15,66,168:3,-1,168,-1:6,135,168:14,66,168,135,-1,127:2,92," +
-"-1,127,105,127:32,-1,127:23,-1:18,169:12,38,169:3,38,169:2,-1,169,-1:6,169:" +
-"18,-1:18,168:12,67,168:3,67,168:2,-1,168,-1:6,135,168:16,135,-1,127:3,-1,12" +
-"7,88,127:32,-1,127:23,-1:18,169:2,39,169:16,-1,169,-1:6,169:5,39,169:12,-1:" +
-"18,168:9,73,168:9,-1,168,-1:6,135,168:8,73,168:7,135,-1,127:3,-1,127,-1,127" +
-":32,-1,127:23,-1:18,169:7,40,169:11,-1,169,-1:6,169:3,40,169:14,-1:18,168:2" +
-",45,168:16,-1,168,-1:6,135,168:4,45,168:11,135,-1:18,169:6,41,169:12,-1,169" +
-",-1:6,169:11,41,169:6,-1:18,168:2,72,168:16,-1,168,-1:6,135,168:4,72,168:11" +
-",135,-1:3,102,-1:2,105,-1:74,169:3,42,169:15,-1,169,-1:6,169:8,42,169:9,-1:" +
-"18,168:2,68,168:16,-1,168,-1:6,135,168:4,68,168:11,135,1,18:38,22,-1,54,18:" +
-"21,-1:18,169:2,43,169:16,-1,169,-1:6,169:5,43,169:12,-1:18,168:7,69,168:11," +
-"-1,168,-1:6,135,168:2,69,168:13,135,-1:18,169:9,44,169:9,-1,169,-1:6,169:9," +
-"44,169:8,-1:18,168:6,70,168:12,-1,168,-1:6,135,168:10,70,168:5,135,-1:18,16" +
-"9:4,46,169:14,-1,169,-1:6,169:13,46,169:4,-1:18,168:3,71,168:15,-1,168,-1:6" +
-",135,168:7,71,168:8,135,-1:18,169:2,47,169:16,-1,169,-1:6,169:5,47,169:12,-" +
-"1:18,168:2,48,168:16,-1,168,-1:6,135,168:4,48,168:11,135,-1:18,169:14,49,16" +
-"9:4,-1,169,-1:6,169:4,49,169:13,-1:18,168:4,74,168:14,-1,168,-1:6,135,168:1" +
-"2,74,168:3,135,-1:18,169:4,50,169:14,-1,169,-1:6,169:13,50,169:4,-1:18,168:" +
-"2,75,168:16,-1,168,-1:6,135,168:4,75,168:11,135,-1:18,168:14,76,168:4,-1,16" +
-"8,-1:6,135,168:3,76,168:12,135,-1:18,168:4,77,168:14,-1,168,-1:6,135,168:12" +
-",77,168:3,135,-1:18,168:2,91,168:2,149,168:13,-1,168,-1:6,135,168:4,91,168:" +
-"4,149,168:6,135,-1,78:2,108,83,78,99,78:32,-1,78:23,-1:18,169:2,90,169:2,13" +
-"6,169:13,-1,169,-1:6,169:5,90,169:4,136,169:7,-1:18,168:2,95,168:2,98,168:1" +
-"3,-1,168,-1:6,135,168:4,95,168:4,98,168:6,135,-1:18,169:2,94,169:2,97,169:1" +
-"3,-1,169,-1:6,169:5,94,169:4,97,169:7,-1:18,168:2,101,168:16,-1,168,-1:6,13" +
-"5,168:4,101,168:11,135,-1:18,169:4,100,169:14,-1,169,-1:6,169:13,100,169:4," +
-"-1:18,168:17,104,168,-1,168,-1:6,135,168:13,104,168:2,135,-1:18,169:8,103,1" +
-"69:10,-1,169,-1:6,169,103,169:16,-1:18,169:5,106,169:13,-1,169,-1:6,169:10," +
-"106,169:7,-1:18,168:3,155,168:15,-1,168,-1:6,135,168:7,155,168:8,135,-1:18," +
-"169:5,109,169:13,-1,169,-1:6,169:10,109,169:7,-1:18,168:8,157,168:10,-1,168" +
-",-1:6,135,157,168:15,135,-1:18,169:8,152,169:10,-1,169,-1:6,169,152,169:16," +
-"-1:18,168:4,107,168:14,-1,168,-1:6,135,168:12,107,168:3,135,-1:18,169:4,112" +
-",169:14,-1,169,-1:6,169:13,112,169:4,-1:18,168:4,110,168:14,-1,168,-1:6,135" +
-",168:12,110,168:3,135,-1:18,169:2,114,169:16,-1,169,-1:6,169:5,114,169:12,-" +
-"1:18,168:8,113,168:10,-1,168,-1:6,135,113,168:15,135,-1:18,154,169:18,-1,16" +
-"9,-1:6,169:7,154,169:10,-1:18,168:13,159,168:5,-1,159,-1:6,135,168:16,135,-" +
-"1:18,169:5,156,169:13,-1,169,-1:6,169:10,156,169:7,-1:18,168:5,115,168:13,-" +
-"1,168,-1:6,135,168:9,115,168:6,135,-1:18,169:2,158,169:16,-1,169,-1:6,169:5" +
-",158,169:12,-1:18,168:5,117,168:13,-1,168,-1:6,135,168:9,117,168:6,135,-1:1" +
-"8,169:4,116,169:14,-1,169,-1:6,169:13,116,169:4,-1:18,163,168:18,-1,168,-1:" +
-"6,135,168:6,163,168:9,135,-1:18,169:3,118,169:15,-1,169,-1:6,169:8,118,169:" +
-"9,-1:18,168:4,119,168:14,-1,168,-1:6,135,168:12,119,168:3,135,-1:18,120,169" +
-":18,-1,169,-1:6,169:7,120,169:10,-1:18,168:4,121,168:14,-1,168,-1:6,135,168" +
-":12,121,168:3,135,-1:18,169:11,160,169:7,-1,169,-1:6,169:12,160,169:5,-1:18" +
-",168:5,164,168:13,-1,168,-1:6,135,168:9,164,168:6,135,-1:18,162,169:18,-1,1" +
-"69,-1:6,169:7,162,169:10,-1:18,168:2,165,168:16,-1,168,-1:6,135,168:4,165,1" +
-"68:11,135,-1:18,169:12,122,169:3,122,169:2,-1,169,-1:6,169:18,-1:18,168:3,1" +
-"23,168:15,-1,168,-1:6,135,168:7,123,168:8,135,-1:18,124,168:18,-1,168,-1:6," +
-"135,168:6,124,168:9,135,-1:18,168:11,166,168:7,-1,168,-1:6,135,168:11,166,1" +
-"68:4,135,-1:18,167,168:18,-1,168,-1:6,135,168:6,167,168:9,135,-1:18,168:12," +
-"125,168:3,125,168:2,-1,168,-1:6,135,168:16,135,-1:18,168:3,139,168:4,141,16" +
-"8:10,-1,168,-1:6,135,141,168:6,139,168:8,135,-1:18,169:5,138,169:13,-1,169," +
-"-1:6,169:10,138,169:7,-1:18,168:3,143,145,168:14,-1,168,-1:6,135,168:7,143," +
-"168:4,145,168:3,135,-1:18,169:3,140,169:4,142,169:10,-1,169,-1:6,169,142,16" +
-"9:6,140,169:9,-1:18,168:5,151,168:13,-1,168,-1:6,135,168:9,151,168:6,135,-1" +
-":18,169:10,144,169:8,-1,169,-1:6,169:6,144,169:11,-1:18,168:10,153,168:8,-1" +
-",168,-1:6,135,168:5,153,168:10,135,-1:18,169:10,146,169:8,-1,169,-1:6,169:6" +
-",146,169:11,-1:18,169:13,148,169:5,-1,148,-1:6,169:18");
+	private int yy_nxt[][] = unpackFromString(116,62,
+"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,6,20,57,79,121,164,83,166,1" +
+"68,164,125,164:2,170,164:2,172,21,164,58,5,56,22,23,6,24,163:2,165,163,167," +
+"163,80,119,123,84,169,163:3,171,164,6,-1:64,25,-1:62,26,-1:62,5,-1:34,5:2,-" +
+"1:27,55,-1:74,27,-1:48,28,-1:4,29,-1:70,164,30,164:2,173,164:4,31,164:8,30," +
+"-1,164,-1:3,164:9,31,164:3,173,164:4,-1:20,163:10,126,128,163:7,-1,163,-1:3" +
+",130,163:5,126,163:5,128,163:4,130,-1,23:41,34,78,23:18,-1:44,24,-1:37,164:" +
+"19,-1,164,-1:3,164:18,-1:20,164:10,145,164:8,-1,164,-1:3,164:6,145,164:11,-" +
+"1,35:40,-1,35:20,-1:20,163:19,-1,163,-1:3,130,163:16,130,1,52,77,76,81:37,2" +
+"2,81:20,-1,82,53,-1:60,122:2,-1,122:37,-1,122:20,-1:4,5,-1:15,163:19,5,56,-" +
+"1:3,130,163:16,130,-1:20,32,164:18,-1,164,-1:3,164:7,32,164:10,-1:20,61,163" +
+":7,132,163:10,-1,163,-1:3,130,132,163:5,61,163:9,130,-1:20,163:10,156,163:8" +
+",-1,163,-1:3,130,163:5,156,163:10,130,-1,120,86,76,81:37,-1,81:20,-1,122,85" +
+",54,122:37,-1,122:20,-1,23:3,-1,23:36,-1,23:20,-1:20,164:3,127,129,164:14,-" +
+"1,164,-1:3,164:8,127,164:4,129,164:4,-1:20,163,59,163:2,142,163:4,60,163:8," +
+"59,-1,163,-1:3,130,163:8,60,163:3,142,163:3,130,-1,90,86,76,81:37,-1,81:20," +
+"-1,122,-1:2,122:37,-1,122:20,-1:20,164,33,164:16,33,-1,164,-1:3,164:18,-1:2" +
+"0,163,62,163:16,62,-1,163,-1:3,130,163:16,130,-1,81,85,76,81:37,-1,81:20,-1" +
+",122,85,-1,122:37,-1,122:20,-1:20,164:12,36,164:3,36,164:2,-1,164,-1:3,164:" +
+"18,-1:20,163:12,63,163:3,63,163:2,-1,163,-1:3,130,163:16,130,-1,89,86,76,81" +
+":37,-1,81:20,-1,124,96,-1,122:37,-1,122:20,-1:20,164:15,37,164:3,-1,164,-1:" +
+"3,164:15,37,164:2,-1:20,163:15,64,163:3,-1,163,-1:3,130,163:14,64,163,130,-" +
+"1,82,96,-1:79,164:12,38,164:3,38,164:2,-1,164,-1:3,164:18,-1:20,163:12,65,1" +
+"63:3,65,163:2,-1,163,-1:3,130,163:16,130,-1:20,164:2,39,164:16,-1,164,-1:3," +
+"164:5,39,164:12,-1:20,163:9,71,163:9,-1,163,-1:3,130,163:8,71,163:7,130,-1:" +
+"20,164:7,40,164:11,-1,164,-1:3,164:3,40,164:14,-1:20,163:2,45,163:16,-1,163" +
+",-1:3,130,163:4,45,163:11,130,-1:20,164:6,41,164:12,-1,164,-1:3,164:11,41,1" +
+"64:6,-1:20,163:2,70,163:16,-1,163,-1:3,130,163:4,70,163:11,130,-1:20,164:3," +
+"42,164:15,-1,164,-1:3,164:8,42,164:9,-1:20,163:2,66,163:16,-1,163,-1:3,130," +
+"163:4,66,163:11,130,-1:20,164:2,43,164:16,-1,164,-1:3,164:5,43,164:12,-1:20" +
+",163:7,67,163:11,-1,163,-1:3,130,163:2,67,163:13,130,-1:20,164:9,44,164:9,-" +
+"1,164,-1:3,164:9,44,164:8,-1:20,163:6,68,163:12,-1,163,-1:3,130,163:10,68,1" +
+"63:5,130,-1:20,164:4,46,164:14,-1,164,-1:3,164:13,46,164:4,-1:20,163:3,69,1" +
+"63:15,-1,163,-1:3,130,163:7,69,163:8,130,-1:20,164:2,47,164:16,-1,164,-1:3," +
+"164:5,47,164:12,-1:20,163:2,48,163:16,-1,163,-1:3,130,163:4,48,163:11,130,-" +
+"1:20,164:14,49,164:4,-1,164,-1:3,164:4,49,164:13,-1:20,163:4,72,163:14,-1,1" +
+"63,-1:3,130,163:12,72,163:3,130,-1:20,164:4,50,164:14,-1,164,-1:3,164:13,50" +
+",164:4,-1:20,163:2,73,163:16,-1,163,-1:3,130,163:4,73,163:11,130,-1:20,163:" +
+"14,74,163:4,-1,163,-1:3,130,163:3,74,163:12,130,-1:20,163:4,75,163:14,-1,16" +
+"3,-1:3,130,163:12,75,163:3,130,-1:20,163:2,88,163:2,144,163:13,-1,163,-1:3," +
+"130,163:4,88,163:4,144,163:6,130,-1:20,164:2,87,164:2,131,164:13,-1,164,-1:" +
+"3,164:5,87,164:4,131,164:7,-1,93,86,76,81:37,-1,81:20,-1:20,163:2,92,163:2," +
+"95,163:13,-1,163,-1:3,130,163:4,92,163:4,95,163:6,130,-1,81,86,76,81:37,-1," +
+"81:20,-1:20,164:2,91,164:2,94,164:13,-1,164,-1:3,164:5,91,164:4,94,164:7,-1" +
+":20,163:2,98,163:16,-1,163,-1:3,130,163:4,98,163:11,130,-1:20,164:4,97,164:" +
+"14,-1,164,-1:3,164:13,97,164:4,-1:20,163:17,100,163,-1,163,-1:3,130,163:13," +
+"100,163:2,130,-1:20,164:8,99,164:10,-1,164,-1:3,164,99,164:16,-1:20,164:5,1" +
+"01,164:13,-1,164,-1:3,164:10,101,164:7,-1:20,163:3,150,163:15,-1,163,-1:3,1" +
+"30,163:7,150,163:8,130,-1:20,164:5,103,164:13,-1,164,-1:3,164:10,103,164:7," +
+"-1:20,163:8,152,163:10,-1,163,-1:3,130,152,163:15,130,-1:20,164:8,147,164:1" +
+"0,-1,164,-1:3,164,147,164:16,-1:20,163:4,102,163:14,-1,163,-1:3,130,163:12," +
+"102,163:3,130,-1:20,164:4,105,164:14,-1,164,-1:3,164:13,105,164:4,-1:20,163" +
+":4,104,163:14,-1,163,-1:3,130,163:12,104,163:3,130,-1:20,164:2,107,164:16,-" +
+"1,164,-1:3,164:5,107,164:12,-1:20,163:8,106,163:10,-1,163,-1:3,130,106,163:" +
+"15,130,-1:20,149,164:18,-1,164,-1:3,164:7,149,164:10,-1:20,163:13,154,163:5" +
+",-1,154,-1:3,130,163:16,130,-1:20,164:5,151,164:13,-1,164,-1:3,164:10,151,1" +
+"64:7,-1:20,163:5,108,163:13,-1,163,-1:3,130,163:9,108,163:6,130,-1:20,164:2" +
+",153,164:16,-1,164,-1:3,164:5,153,164:12,-1:20,163:5,110,163:13,-1,163,-1:3" +
+",130,163:9,110,163:6,130,-1:20,164:4,109,164:14,-1,164,-1:3,164:13,109,164:" +
+"4,-1:20,158,163:18,-1,163,-1:3,130,163:6,158,163:9,130,-1:20,164:3,111,164:" +
+"15,-1,164,-1:3,164:8,111,164:9,-1:20,163:4,112,163:14,-1,163,-1:3,130,163:1" +
+"2,112,163:3,130,-1:20,113,164:18,-1,164,-1:3,164:7,113,164:10,-1:20,163:4,1" +
+"14,163:14,-1,163,-1:3,130,163:12,114,163:3,130,-1:20,164:11,155,164:7,-1,16" +
+"4,-1:3,164:12,155,164:5,-1:20,163:5,159,163:13,-1,163,-1:3,130,163:9,159,16" +
+"3:6,130,-1:20,157,164:18,-1,164,-1:3,164:7,157,164:10,-1:20,163:2,160,163:1" +
+"6,-1,163,-1:3,130,163:4,160,163:11,130,-1:20,164:12,115,164:3,115,164:2,-1," +
+"164,-1:3,164:18,-1:20,163:3,116,163:15,-1,163,-1:3,130,163:7,116,163:8,130," +
+"-1:20,117,163:18,-1,163,-1:3,130,163:6,117,163:9,130,-1:20,163:11,161,163:7" +
+",-1,163,-1:3,130,163:11,161,163:4,130,-1:20,162,163:18,-1,163,-1:3,130,163:" +
+"6,162,163:9,130,-1:20,163:12,118,163:3,118,163:2,-1,163,-1:3,130,163:16,130" +
+",-1:20,163:3,134,163:4,136,163:10,-1,163,-1:3,130,136,163:6,134,163:8,130,-" +
+"1:20,164:5,133,164:13,-1,164,-1:3,164:10,133,164:7,-1:20,163:3,138,140,163:" +
+"14,-1,163,-1:3,130,163:7,138,163:4,140,163:3,130,-1:20,164:3,135,164:4,137," +
+"164:10,-1,164,-1:3,164,137,164:6,135,164:9,-1:20,163:5,146,163:13,-1,163,-1" +
+":3,130,163:9,146,163:6,130,-1:20,164:10,139,164:8,-1,164,-1:3,164:6,139,164" +
+":11,-1:20,163:10,148,163:8,-1,163,-1:3,130,163:5,148,163:10,130,-1:20,164:1" +
+"0,141,164:8,-1,164,-1:3,164:6,141,164:11,-1:20,164:13,143,164:5,-1,143,-1:3" +
+",164:18");
 
 	public java_cup.runtime.Symbol next_token ()
 		throws java.io.IOException {
@@ -546,9 +562,6 @@ class CoolLexer implements java_cup.runtime.Scanner {
 	case COMMENT:
 		yybegin(YYINITIAL);
 		return new Symbol(TokenConstants.ERROR, "EOF in comment");
-	case STRING:
-		yybegin(YYINITIAL);
-		return new Symbol(TokenConstants.ERROR, "EOF in string constant");
     }
     return new Symbol(TokenConstants.EOF);
 			}
@@ -577,91 +590,91 @@ class CoolLexer implements java_cup.runtime.Scanner {
 					case -2:
 						break;
 					case 2:
-						{ return new Symbol(TokenConstants.SEMI);  }
+						{ return new Symbol(TokenConstants.LPAREN);}
 					case -3:
 						break;
 					case 3:
-						{ return new Symbol(TokenConstants.COLON); }
+						{ return new Symbol(TokenConstants.MULT);  }
 					case -4:
 						break;
 					case 4:
-						{ return new Symbol(TokenConstants.LPAREN);}
+						{ return new Symbol(TokenConstants.RPAREN);}
 					case -5:
 						break;
 					case 5:
-						{ return new Symbol(TokenConstants.RPAREN);}
+						{ }
 					case -6:
 						break;
 					case 6:
-						{ return new Symbol(TokenConstants.MINUS); }
-					case -7:
-						break;
-					case 7:
-						{ return new Symbol(TokenConstants.MULT);  }
-					case -8:
-						break;
-					case 8:
-						{ return new Symbol(TokenConstants.DIV);   }
-					case -9:
-						break;
-					case 9:
-						{ return new Symbol(TokenConstants.PLUS);  }
-					case -10:
-						break;
-					case 10:
-						{ return new Symbol(TokenConstants.EQ);    }
-					case -11:
-						break;
-					case 11:
-						{ return new Symbol(TokenConstants.COMMA); }
-					case -12:
-						break;
-					case 12:
-						{ return new Symbol(TokenConstants.DOT);   }
-					case -13:
-						break;
-					case 13:
-						{ return new Symbol(TokenConstants.LT);    }
-					case -14:
-						break;
-					case 14:
-						{ return new Symbol(TokenConstants.LBRACE);}
-					case -15:
-						break;
-					case 15:
-						{ return new Symbol(TokenConstants.RBRACE);}
-					case -16:
-						break;
-					case 16:
-						{ return new Symbol(TokenConstants.NEG);   }
-					case -17:
-						break;
-					case 17:
-						{ return new Symbol(TokenConstants.AT);    }
-					case -18:
-						break;
-					case 18:
 						{     
 	return new Symbol(TokenConstants.ERROR, yytext());
 }
+					case -7:
+						break;
+					case 7:
+						{ return new Symbol(TokenConstants.MINUS); }
+					case -8:
+						break;
+					case 8:
+						{ return new Symbol(TokenConstants.SEMI);  }
+					case -9:
+						break;
+					case 9:
+						{ return new Symbol(TokenConstants.COLON); }
+					case -10:
+						break;
+					case 10:
+						{ return new Symbol(TokenConstants.DIV);   }
+					case -11:
+						break;
+					case 11:
+						{ return new Symbol(TokenConstants.PLUS);  }
+					case -12:
+						break;
+					case 12:
+						{ return new Symbol(TokenConstants.EQ);    }
+					case -13:
+						break;
+					case 13:
+						{ return new Symbol(TokenConstants.COMMA); }
+					case -14:
+						break;
+					case 14:
+						{ return new Symbol(TokenConstants.DOT);   }
+					case -15:
+						break;
+					case 15:
+						{ return new Symbol(TokenConstants.LT);    }
+					case -16:
+						break;
+					case 16:
+						{ return new Symbol(TokenConstants.LBRACE);}
+					case -17:
+						break;
+					case 17:
+						{ return new Symbol(TokenConstants.RBRACE);}
+					case -18:
+						break;
+					case 18:
+						{ return new Symbol(TokenConstants.NEG);   }
 					case -19:
 						break;
 					case 19:
-						{
-	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
-}
+						{ return new Symbol(TokenConstants.AT);    }
 					case -20:
 						break;
 					case 20:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
 					case -21:
 						break;
 					case 21:
-						{ }
+						{
+	IdTable table = new IdTable();
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+}
 					case -22:
 						break;
 					case 22:
@@ -669,7 +682,12 @@ class CoolLexer implements java_cup.runtime.Scanner {
 					case -23:
 						break;
 					case 23:
-						{ yybegin(STRING);  }
+						{
+	StringTable table = new StringTable();
+	String str =  yytext().substring(1,yytext().length());
+	assert(str.length() == yytext().length() - 1);
+	return new Symbol(TokenConstants.ERROR, table.addString("EOF in string constant"));
+}
 					case -24:
 						break;
 					case 24:
@@ -720,8 +738,7 @@ class CoolLexer implements java_cup.runtime.Scanner {
 					case 34:
 						{
 	StringTable table = new StringTable();
-	String str =  yytext().substring(1,yytext().length() - 1);
-	assert(str.length() == yytext().length() - 2);
+	String str = FixString.parse_string(yytext());
 	return new Symbol(TokenConstants.STR_CONST, table.addString(str));
 }
 					case -35:
@@ -801,10 +818,14 @@ class CoolLexer implements java_cup.runtime.Scanner {
 					case -52:
 						break;
 					case 52:
-						{ c_count += 1; }
+						{}
 					case -53:
 						break;
 					case 53:
+						{ c_count += 1; }
+					case -54:
+						break;
+					case 54:
 						{  
 	c_count -= 1;
 	assert(c_count >= 0);
@@ -812,16 +833,10 @@ class CoolLexer implements java_cup.runtime.Scanner {
 		yybegin(YYINITIAL);
 	}
 }
-					case -54:
-						break;
-					case 54:
-						{ yybegin(YYINITIAL); }
 					case -55:
 						break;
 					case 56:
-						{     
-	return new Symbol(TokenConstants.ERROR, yytext());
-}
+						{ }
 					case -56:
 						break;
 					case 57:
@@ -839,705 +854,692 @@ class CoolLexer implements java_cup.runtime.Scanner {
 					case -58:
 						break;
 					case 59:
-						{ }
+						{ return new Symbol(TokenConstants.IF);     }
 					case -59:
 						break;
 					case 60:
-						{ return new Symbol(TokenConstants.IF);     }
+						{ return new Symbol(TokenConstants.IN);     }
 					case -60:
 						break;
 					case 61:
-						{ return new Symbol(TokenConstants.IN);     }
+						{ return new Symbol(TokenConstants.FI);     }
 					case -61:
 						break;
 					case 62:
-						{ return new Symbol(TokenConstants.FI);     }
+						{ return new Symbol(TokenConstants.OF);	    }
 					case -62:
 						break;
 					case 63:
-						{ return new Symbol(TokenConstants.OF);	    }
+						{ return new Symbol(TokenConstants.LET);    }
 					case -63:
 						break;
 					case 64:
-						{
-	StringTable table = new StringTable();
-	String str =  yytext().substring(1,yytext().length() - 1);
-	assert(str.length() == yytext().length() - 2);
-	return new Symbol(TokenConstants.STR_CONST, table.addString(str));
-}
+						{ return new Symbol(TokenConstants.NEW);    }
 					case -64:
 						break;
 					case 65:
-						{ return new Symbol(TokenConstants.LET);    }
+						{ return new Symbol(TokenConstants.NOT);    }
 					case -65:
 						break;
 					case 66:
-						{ return new Symbol(TokenConstants.NEW);    }
+						{ return new Symbol(TokenConstants.ELSE);   }
 					case -66:
 						break;
 					case 67:
-						{ return new Symbol(TokenConstants.NOT);    }
+						{ return new Symbol(TokenConstants.ESAC);   }
 					case -67:
 						break;
 					case 68:
-						{ return new Symbol(TokenConstants.ELSE);   }
+						{ return new Symbol(TokenConstants.LOOP);   }
 					case -68:
 						break;
 					case 69:
-						{ return new Symbol(TokenConstants.ESAC);   }
+						{ return new Symbol(TokenConstants.POOL);   }
 					case -69:
 						break;
 					case 70:
-						{ return new Symbol(TokenConstants.LOOP);   }
+						{ return new Symbol(TokenConstants.CASE);   }
 					case -70:
 						break;
 					case 71:
-						{ return new Symbol(TokenConstants.POOL);   }
+						{ return new Symbol(TokenConstants.THEN);   }
 					case -71:
 						break;
 					case 72:
-						{ return new Symbol(TokenConstants.CASE);   }
+						{ return new Symbol(TokenConstants.CLASS);  }
 					case -72:
 						break;
 					case 73:
-						{ return new Symbol(TokenConstants.THEN);   }
+						{ return new Symbol(TokenConstants.WHILE);  }
 					case -73:
 						break;
 					case 74:
-						{ return new Symbol(TokenConstants.CLASS);  }
+						{ return new Symbol(TokenConstants.ISVOID); }
 					case -74:
 						break;
 					case 75:
-						{ return new Symbol(TokenConstants.WHILE);  }
+						{ return new Symbol(TokenConstants.INHERITS);}
 					case -75:
 						break;
 					case 76:
-						{ return new Symbol(TokenConstants.ISVOID); }
+						{}
 					case -76:
 						break;
 					case 77:
-						{ return new Symbol(TokenConstants.INHERITS);}
+						{}
 					case -77:
 						break;
-					case 78:
-						{}
-					case -78:
-						break;
-					case 80:
-						{     
-	return new Symbol(TokenConstants.ERROR, yytext());
-}
-					case -79:
-						break;
-					case 81:
+					case 79:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -80:
+					case -78:
 						break;
-					case 82:
+					case 80:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -81:
+					case -79:
+						break;
+					case 81:
+						{}
+					case -80:
 						break;
 					case 83:
-						{}
+						{
+	IdTable table = new IdTable();
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+}
+					case -81:
+						break;
+					case 84:
+						{
+	IdTable table = new IdTable();
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+}
 					case -82:
 						break;
 					case 85:
-						{     
-	return new Symbol(TokenConstants.ERROR, yytext());
-}
+						{}
 					case -83:
 						break;
-					case 86:
+					case 87:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
 					case -84:
 						break;
-					case 87:
+					case 88:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
 					case -85:
 						break;
-					case 88:
+					case 89:
 						{}
 					case -86:
 						break;
-					case 90:
+					case 91:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
 					case -87:
 						break;
-					case 91:
+					case 92:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
 					case -88:
 						break;
-					case 92:
-						{}
-					case -89:
-						break;
 					case 94:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -90:
+					case -89:
 						break;
 					case 95:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -91:
+					case -90:
 						break;
 					case 97:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -92:
+					case -91:
 						break;
 					case 98:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
+					case -92:
+						break;
+					case 99:
+						{
+	IdTable table = new IdTable();
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+}
 					case -93:
 						break;
 					case 100:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
 					case -94:
 						break;
 					case 101:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
 					case -95:
+						break;
+					case 102:
+						{
+	IdTable table = new IdTable();
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+}
+					case -96:
 						break;
 					case 103:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -96:
+					case -97:
 						break;
 					case 104:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -97:
+					case -98:
 						break;
-					case 106:
+					case 105:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -98:
+					case -99:
 						break;
-					case 107:
+					case 106:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -99:
+					case -100:
+						break;
+					case 107:
+						{
+	IdTable table = new IdTable();
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+}
+					case -101:
+						break;
+					case 108:
+						{
+	IdTable table = new IdTable();
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+}
+					case -102:
 						break;
 					case 109:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -100:
+					case -103:
 						break;
 					case 110:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -101:
+					case -104:
+						break;
+					case 111:
+						{
+	IdTable table = new IdTable();
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+}
+					case -105:
 						break;
 					case 112:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -102:
+					case -106:
 						break;
 					case 113:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -103:
+					case -107:
 						break;
 					case 114:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -104:
+					case -108:
 						break;
 					case 115:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -105:
+					case -109:
 						break;
 					case 116:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -106:
+					case -110:
 						break;
 					case 117:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -107:
+					case -111:
 						break;
 					case 118:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -108:
+					case -112:
 						break;
 					case 119:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -109:
+					case -113:
 						break;
 					case 120:
-						{
-	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
-}
-					case -110:
+						{}
+					case -114:
 						break;
 					case 121:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
-}
-					case -111:
-						break;
-					case 122:
-						{
-	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -112:
+					case -115:
+						break;
+					case 122:
+						{}
+					case -116:
 						break;
 					case 123:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -113:
+					case -117:
 						break;
 					case 124:
-						{
-	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
-}
-					case -114:
+						{}
+					case -118:
 						break;
 					case 125:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -115:
+					case -119:
 						break;
 					case 126:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -116:
+					case -120:
 						break;
 					case 127:
-						{}
-					case -117:
+						{
+	IdTable table = new IdTable();
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+}
+					case -121:
 						break;
 					case 128:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -118:
+					case -122:
 						break;
 					case 129:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -119:
+					case -123:
 						break;
 					case 130:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -120:
+					case -124:
 						break;
 					case 131:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -121:
+					case -125:
 						break;
 					case 132:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -122:
+					case -126:
 						break;
 					case 133:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -123:
+					case -127:
 						break;
 					case 134:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -124:
+					case -128:
 						break;
 					case 135:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -125:
+					case -129:
 						break;
 					case 136:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -126:
+					case -130:
 						break;
 					case 137:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -127:
+					case -131:
 						break;
 					case 138:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -128:
+					case -132:
 						break;
 					case 139:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -129:
+					case -133:
 						break;
 					case 140:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -130:
+					case -134:
 						break;
 					case 141:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -131:
+					case -135:
 						break;
 					case 142:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -132:
+					case -136:
 						break;
 					case 143:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -133:
+					case -137:
 						break;
 					case 144:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -134:
+					case -138:
 						break;
 					case 145:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -135:
+					case -139:
 						break;
 					case 146:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -136:
+					case -140:
 						break;
 					case 147:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -137:
+					case -141:
 						break;
 					case 148:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -138:
+					case -142:
 						break;
 					case 149:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -139:
+					case -143:
 						break;
 					case 150:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -140:
+					case -144:
 						break;
 					case 151:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -141:
+					case -145:
 						break;
 					case 152:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -142:
+					case -146:
 						break;
 					case 153:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -143:
+					case -147:
 						break;
 					case 154:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -144:
+					case -148:
 						break;
 					case 155:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -145:
+					case -149:
 						break;
 					case 156:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -146:
+					case -150:
 						break;
 					case 157:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -147:
+					case -151:
 						break;
 					case 158:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -148:
+					case -152:
 						break;
 					case 159:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -149:
-						break;
-					case 160:
-						{
-	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
-}
-					case -150:
-						break;
-					case 161:
-						{
-	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
-}
-					case -151:
-						break;
-					case 162:
-						{
-	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
-}
-					case -152:
-						break;
-					case 163:
-						{
-	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
-}
 					case -153:
 						break;
-					case 164:
+					case 160:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
 					case -154:
 						break;
-					case 165:
+					case 161:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
 					case -155:
 						break;
-					case 166:
+					case 162:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
 					case -156:
 						break;
-					case 167:
+					case 163:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
 					case -157:
 						break;
-					case 168:
+					case 164:
+						{
+	IdTable table = new IdTable();
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+}
+					case -158:
+						break;
+					case 165:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -158:
+					case -159:
+						break;
+					case 166:
+						{
+	IdTable table = new IdTable();
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+}
+					case -160:
+						break;
+					case 167:
+						{
+	IdTable table = new IdTable();
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+}
+					case -161:
+						break;
+					case 168:
+						{
+	IdTable table = new IdTable();
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+}
+					case -162:
 						break;
 					case 169:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -159:
+					case -163:
 						break;
 					case 170:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -160:
+					case -164:
 						break;
 					case 171:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
+	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
 }
-					case -161:
+					case -165:
 						break;
 					case 172:
 						{
 	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
+	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -162:
+					case -166:
 						break;
 					case 173:
 						{
 	IdTable table = new IdTable();
 	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-					case -163:
-						break;
-					case 174:
-						{
-	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
-}
-					case -164:
-						break;
-					case 175:
-						{
-	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
-}
-					case -165:
-						break;
-					case 176:
-						{
-	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.OBJECTID, table.addString(yytext()));
-}
-					case -166:
-						break;
-					case 177:
-						{
-	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
-}
 					case -167:
-						break;
-					case 178:
-						{
-	IdTable table = new IdTable();
-	return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
-}
-					case -168:
 						break;
 					default:
 						yy_error(YY_E_INTERNAL,false);
