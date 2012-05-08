@@ -3,7 +3,32 @@
  */
 
 import java_cup.runtime.Symbol;
+import java.lang.String;
+import java.lang.StringBuilder;
 
+class FixString {
+	public static String parse_string(String str) {
+		String nStr = str.substring(1, str.length()-1);
+		StringBuilder rStr = new StringBuilder();
+        int x;
+        for (x=0; x<nStr.length(); ++x) {
+            if (nStr.charAt(x) == '\\' && (x++ < nStr.length())) {
+                switch (nStr.charAt(x++)) {
+                    case 'n':  rStr.append('\n'); break;
+					case 't':  rStr.append('\t'); break;
+					case '\\': rStr.append('\\'); break;
+					case '"':  rStr.append('"');  break;
+					default:   rStr.append('\\'); break;
+       		 	}
+				x++;
+    		}
+			else {
+				rStr.append(nStr.charAt(x));
+			}
+		}
+		return rStr.toString();
+	}
+}
 
 %%
 
@@ -18,7 +43,6 @@ import java_cup.runtime.Symbol;
     static int MAX_STR_CONST = 1025;
 
     // For assembling string constants
-    StringBuffer string_buf = new StringBuffer();
 
     private int curr_lineno = 1;
     int get_curr_lineno() {
@@ -32,7 +56,7 @@ import java_cup.runtime.Symbol;
     }
 
     AbstractSymbol curr_filename() {
-	return filename;
+		return filename;
     }
 %}
 
@@ -61,9 +85,6 @@ import java_cup.runtime.Symbol;
 	case COMMENT:
 		yybegin(YYINITIAL);
 		return new Symbol(TokenConstants.ERROR, "EOF in comment");
-	case STRING:
-		yybegin(YYINITIAL);
-		return new Symbol(TokenConstants.ERROR, "EOF in string constant");
     }
     return new Symbol(TokenConstants.EOF);
 %eofval}
@@ -75,16 +96,32 @@ import java_cup.runtime.Symbol;
 %cup
 %line
 %state COMMENT
-%state STRING
+
 
 ALPHA=[A-Za-z]
 DIGIT=[0-9]
-NONNEWLINE_WHITE_SPACE_CHAR=[\ \t\f\v]
-WHITE_SPACE_CHAR=[\\n\ \t\f\v]
-STRING_TEXT=\"([^\"]|\\.)*\"|\'([^\'\\]|\\.)*\' 
+NONNEWLINE_WHITE_SPACE_CHAR=[\ \t\f\v\b\r\013]
+STRING_TEXT=(\\.|[^\\\"])* 
 COMMENT_TEXT=([^(*\n]|[^*\n]"("[^*)\n]|[^)\n]"*"[^)\n]|"*"[^)\n]|")"[^*\n])*
 ALT_COMMENT_TEXT=(--[^\n]+)
 %%
+
+
+<YYINITIAL>"(*" { yybegin(COMMENT); c_count = c_count + 1; }
+<YYINITIAL>"*)" {
+	return new Symbol(TokenConstants.ERROR, "Unmatched *)");
+}
+<COMMENT>"(*" { c_count += 1; }
+<COMMENT>"*)" {  
+	c_count -= 1;
+	assert(c_count >= 0);
+	if (c_count == 0) {
+		yybegin(YYINITIAL);
+	}
+}
+<COMMENT> {COMMENT_TEXT} {}
+<COMMENT>. {}
+<YYINITIAL> {ALT_COMMENT_TEXT} {}
 
 <YYINITIAL>";"			{ return new Symbol(TokenConstants.SEMI);  }
 <YYINITIAL>":"			{ return new Symbol(TokenConstants.COLON); }
@@ -134,37 +171,18 @@ ALT_COMMENT_TEXT=(--[^\n]+)
 }
 
 <YYINITIAL> {NONNEWLINE_WHITE_SPACE_CHAR}+ { }
-<YYINITIAL,COMMENT,STRING> \n { curr_lineno += 1; }
+<YYINITIAL,COMMENT> \n { curr_lineno += 1; }
 
-<YYINITIAL>"(*" { yybegin(COMMENT); c_count = c_count + 1; }
-<YYINITIAL>"*)" {
-	return new Symbol(TokenConstants.ERROR, "Unmatched *)");
-}
-<COMMENT>"(*" { c_count += 1; }
-<COMMENT>"*)" {  
-	c_count -= 1;
-	assert(c_count >= 0);
-	if (c_count == 0) {
-		yybegin(YYINITIAL);
-	}
-}
-
-<COMMENT> {COMMENT_TEXT} {}
-<YYINITIAL> {ALT_COMMENT_TEXT} {}
-
-<YYINITIAL>\" 	{ yybegin(STRING);  }
-<STRING>\" 	{ yybegin(YYINITIAL); }
-<YYINITIAL> {STRING_TEXT} {
+<YYINITIAL> \"{STRING_TEXT}\" {
 	StringTable table = new StringTable();
-	String str =  yytext().substring(1,yytext().length() - 1);
-	assert(str.length() == yytext().length() - 2);
+	String str = FixString.parse_string(yytext());
 	return new Symbol(TokenConstants.STR_CONST, table.addString(str));
 }
-<YYINITIAL> {STRING_TEXT} {
+<YYINITIAL> \"{STRING_TEXT} {
 	StringTable table = new StringTable();
 	String str =  yytext().substring(1,yytext().length());
 	assert(str.length() == yytext().length() - 1);
-	return new Symbol(TokenConstants.ERROR, table.addString("Unterminated string constant"));
+	return new Symbol(TokenConstants.ERROR, table.addString("EOF in string constant"));
 } 
 
 <YYINITIAL>{DIGIT}+ { 
