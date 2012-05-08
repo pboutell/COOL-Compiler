@@ -1,0 +1,12 @@
+
+<YYINITIAL> ([a-z]({ALPHA}|{DIGIT}|_)*) {
+	IdTable table = new IdTable();
+	table.addString(yytext());
+	return new Symbol(TokenConstants.OBJECTID);
+}	
+
+<YYINITIAL> ([A-Z]({ALPHA}|{DIGIT}|_)*) {
+	IdTable table = new IdTable();
+	table.addString(yytext());
+	return new Symbol(TokenConstants.TYPEID);
+}
