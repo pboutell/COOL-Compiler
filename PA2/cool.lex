@@ -6,28 +6,38 @@ import java_cup.runtime.Symbol;
 import java.lang.String;
 import java.lang.StringBuilder;
 
-class FixString {
-    public static String parse_string(String str) {
-        String nStr = str.substring(1, str.length()-1);
+class StringConst 
+{
+    public Boolean isError;
+
+    public String parse_string(String str) {
+        String nStr = str;
         StringBuilder rStr = new StringBuilder();
+        isError = false;
         int x;
+
         for (x=0; x<nStr.length(); ++x) {
-            if (nStr.charAt(x) == '\\' && (x+1 < nStr.length())) {
-                switch (nStr.charAt(x+1)) {
-                    case 'n':  rStr.append('\n'); break;
-                    case 'b':  rStr.append('\b'); break;
-                    case 'f':  rStr.append('\f'); break;
-                    case '\\': rStr.append('\\'); break;
-                    case 't':  rStr.append('\t'); break;
-                    case '"':  rStr.append('"');  break;
-                    case '0':  rStr.append('0');  break;
-                    default:   rStr.append(nStr.charAt(x+1)); break;
-                }
-                x++;
+            switch (nStr.charAt(x)) {
+                case '\n': isError = true; return "Unterminated character string.";
+                case '\0': isError = true; return "String contains escaped null character";
+                case '\\': 
+                    if (x+1 >= nStr.length()) break;
+                    switch (nStr.charAt(x+1)) {
+                        case 'n':  rStr.append('\n'); break;
+                        case 'b':  rStr.append('\b'); break;
+                        case 'f':  rStr.append('\f'); break;
+                        case 't':  rStr.append('\t'); break;
+                        case '"':  isError = true; return "EOF_ERR";
+                        default:   rStr.append(nStr.charAt(x+1)); break;
+                    }
+                    x++;
+                    break;
+                default: rStr.append(nStr.charAt(x)); break;
             }
-            else {
-                rStr.append(nStr.charAt(x));
-            }
+        }
+        if (rStr.length() >= 1025) {
+            isError = true;
+            return "String constant too long";
         }
         return rStr.toString();
     }
@@ -84,10 +94,13 @@ class FixString {
     switch(yy_lexical_state) {
         case YYINITIAL:
         /* nothing special to do in the initial state */
-        break;
-    case COMMENT:
-        yybegin(YYINITIAL);
-        return new Symbol(TokenConstants.ERROR, "EOF in comment");
+            break;
+        case COMMENT:
+            yybegin(YYINITIAL);
+            return new Symbol(TokenConstants.ERROR, "EOF in comment");
+        case STRING:
+            yybegin(YYINITIAL);
+            return new Symbol(TokenConstants.ERROR, "EOF in string constant");
     }
     return new Symbol(TokenConstants.EOF);
 %eofval}
@@ -99,7 +112,7 @@ class FixString {
 %cup
 %line
 %state COMMENT
-
+%state STRING
 
 ALPHA=[A-Za-z]
 DIGIT=[0-9]
@@ -108,8 +121,7 @@ STRING_TEXT=(\\.|[^\"])*
 ALT_COMMENT_TEXT=(--[^\n]+)
 %%
 
-
-<YYINITIAL>"(*"|"--" { yybegin(COMMENT); c_count += 1; }
+<YYINITIAL>"(*" { yybegin(COMMENT); c_count += 1; }
 <YYINITIAL>"*)" {
     return new Symbol(TokenConstants.ERROR, "Unmatched *)");
 }
@@ -172,16 +184,24 @@ ALT_COMMENT_TEXT=(--[^\n]+)
 }
 
 <YYINITIAL> {NONNEWLINE_WHITE_SPACE_CHAR}+ { }
-<YYINITIAL,COMMENT> \n { curr_lineno += 1; }
+<YYINITIAL,COMMENT,STRING> \n { curr_lineno += 1; }
 
-<YYINITIAL> \"{STRING_TEXT}\" {
+<YYINITIAL>\" { yybegin(STRING); }
+<STRING>\"    { yybegin(YYINITIAL); }
+
+<STRING> {STRING_TEXT} {
     StringTable table = new StringTable();
-    String str = FixString.parse_string(yytext());
-    return new Symbol(TokenConstants.STR_CONST, table.addString(str));
+    StringConst parse = new StringConst();
+    String str = parse.parse_string(yytext());
+    
+    if (parse.isError == true) {
+        if (!str.contains("EOF_ERR"))  
+            return new Symbol(TokenConstants.ERROR, str);
+    }
+    else {
+        return new Symbol(TokenConstants.STR_CONST, table.addString(str));
+    }
 }
-<YYINITIAL> \"{STRING_TEXT} {
-    return new Symbol(TokenConstants.ERROR, "Unterminated string constant");
-} 
 
 <YYINITIAL>{DIGIT}+ { 
     IntTable table = new IntTable();

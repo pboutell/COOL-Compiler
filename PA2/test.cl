@@ -86,7 +86,7 @@ class Main {
    
     main() : SELF_TYPE {
         {
-            cells <- (new CellularAutomaton).init("         X         ");
+            cells <- (new CellularAutomaton).init("         X         \n");
             cells.print();
             (let countdown : Int <- 20 in
                 while countdown > 0 loop
