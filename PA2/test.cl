@@ -6,7 +6,8 @@
 
 class CellularAutomaton inherits IO {
     population_map : String;
-   
+    String blah = "This is a test\0\n";
+  
     init(map : String) : SELF_TYPE {
         {
             population_map <- map;

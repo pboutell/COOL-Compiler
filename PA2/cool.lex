@@ -12,13 +12,16 @@ class FixString {
         StringBuilder rStr = new StringBuilder();
         int x;
         for (x=0; x<nStr.length(); ++x) {
-            if (nStr.charAt(x) == '\\' && (x++ < nStr.length())) {
-                switch (nStr.charAt(x++)) {
+            if (nStr.charAt(x) == '\\' && (x+1 < nStr.length())) {
+                switch (nStr.charAt(x+1)) {
                     case 'n':  rStr.append('\n'); break;
-                    case 't':  rStr.append('\t'); break;
+                    case 'b':  rStr.append('\b'); break;
+                    case 'f':  rStr.append('\f'); break;
                     case '\\': rStr.append('\\'); break;
+                    case 't':  rStr.append('\t'); break;
                     case '"':  rStr.append('"');  break;
-                    default:   rStr.append('\\'); break;
+                    case '0':  rStr.append('0');  break;
+                    default:   rStr.append(nStr.charAt(x+1)); break;
                 }
                 x++;
             }
@@ -101,13 +104,12 @@ class FixString {
 ALPHA=[A-Za-z]
 DIGIT=[0-9]
 NONNEWLINE_WHITE_SPACE_CHAR=[\ \t\f\v\b\r\013]
-STRING_TEXT=(\\.|[^\\\"])* 
-COMMENT_TEXT=([^(*\n]|[^*\n]"("[^*)\n]|[^)\n]"*"[^)\n]|"*"[^)\n]|")"[^*\n])*
+STRING_TEXT=(\\.|[^\"])* 
 ALT_COMMENT_TEXT=(--[^\n]+)
 %%
 
 
-<YYINITIAL>"(*" { yybegin(COMMENT); c_count = c_count + 1; }
+<YYINITIAL>"(*"|"--" { yybegin(COMMENT); c_count += 1; }
 <YYINITIAL>"*)" {
     return new Symbol(TokenConstants.ERROR, "Unmatched *)");
 }
@@ -119,7 +121,6 @@ ALT_COMMENT_TEXT=(--[^\n]+)
         yybegin(YYINITIAL);
     }
 }
-<COMMENT> {COMMENT_TEXT} {}
 <COMMENT>. {}
 <YYINITIAL> {ALT_COMMENT_TEXT} {}
 
@@ -141,26 +142,26 @@ ALT_COMMENT_TEXT=(--[^\n]+)
 <YYINITIAL>"}"          { return new Symbol(TokenConstants.RBRACE);}
 <YYINITIAL>"~"          { return new Symbol(TokenConstants.NEG);   }
 <YYINITIAL>"@"          { return new Symbol(TokenConstants.AT);    }
-<YYINITIAL>"=>"         { return new Symbol(TokenConstants.DARROW); }
+<YYINITIAL>"=>"         { return new Symbol(TokenConstants.DARROW);}
 
 
-<YYINITIAL>[iI][fF]             { return new Symbol(TokenConstants.IF);     }
-<YYINITIAL>[fF][iI]             { return new Symbol(TokenConstants.FI);     }
-<YYINITIAL>[eE][lL][sS][eE]         { return new Symbol(TokenConstants.ELSE);   }
-<YYINITIAL>[lL][oO][oO][pP]         { return new Symbol(TokenConstants.LOOP);   }
-<YYINITIAL>[pP][oO][oO][lL]         { return new Symbol(TokenConstants.POOL);   }
-<YYINITIAL>[cC][aA][sS][eE]         { return new Symbol(TokenConstants.CASE);   }
-<YYINITIAL>[eE][sS][aA][cC]         { return new Symbol(TokenConstants.ESAC);   }
-<YYINITIAL>[cC][lL][aA][sS][sS]         { return new Symbol(TokenConstants.CLASS);  }
-<YYINITIAL>[iI][nN]             { return new Symbol(TokenConstants.IN);     }
+<YYINITIAL>[iI][fF]                         { return new Symbol(TokenConstants.IF);     }
+<YYINITIAL>[fF][iI]                         { return new Symbol(TokenConstants.FI);     }
+<YYINITIAL>[eE][lL][sS][eE]                 { return new Symbol(TokenConstants.ELSE);   }
+<YYINITIAL>[lL][oO][oO][pP]                 { return new Symbol(TokenConstants.LOOP);   }
+<YYINITIAL>[pP][oO][oO][lL]                 { return new Symbol(TokenConstants.POOL);   }
+<YYINITIAL>[cC][aA][sS][eE]                 { return new Symbol(TokenConstants.CASE);   }
+<YYINITIAL>[eE][sS][aA][cC]                 { return new Symbol(TokenConstants.ESAC);   }
+<YYINITIAL>[cC][lL][aA][sS][sS]             { return new Symbol(TokenConstants.CLASS);  }
+<YYINITIAL>[iI][nN]                         { return new Symbol(TokenConstants.IN);     }
 <YYINITIAL>[iI][nN][hH][eE][rR][iI][tT][sS] { return new Symbol(TokenConstants.INHERITS);}
-<YYINITIAL>[iI][sS][vV][oO][iI][dD]     { return new Symbol(TokenConstants.ISVOID); }
-<YYINITIAL>[lL][eE][tT]             { return new Symbol(TokenConstants.LET);    }
-<YYINITIAL>[tT][hH][eE][nN]         { return new Symbol(TokenConstants.THEN);   }
-<YYINITIAL>[wW][hH][iI][lL][eE]         { return new Symbol(TokenConstants.WHILE);  }
-<YYINITIAL>[nN][eE][wW]             { return new Symbol(TokenConstants.NEW);    }
-<YYINITIAL>[nN][oO][tT]             { return new Symbol(TokenConstants.NOT);    }
-<YYINITIAL>[oO][fF]             { return new Symbol(TokenConstants.OF);     }
+<YYINITIAL>[iI][sS][vV][oO][iI][dD]         { return new Symbol(TokenConstants.ISVOID); }
+<YYINITIAL>[lL][eE][tT]                     { return new Symbol(TokenConstants.LET);    }
+<YYINITIAL>[tT][hH][eE][nN]                 { return new Symbol(TokenConstants.THEN);   }
+<YYINITIAL>[wW][hH][iI][lL][eE]             { return new Symbol(TokenConstants.WHILE);  }
+<YYINITIAL>[nN][eE][wW]                     { return new Symbol(TokenConstants.NEW);    }
+<YYINITIAL>[nN][oO][tT]                     { return new Symbol(TokenConstants.NOT);    }
+<YYINITIAL>[oO][fF]                         { return new Symbol(TokenConstants.OF);     }
 <YYINITIAL>(t[rR][uU][eE])  { 
     BoolConst bool = new BoolConst(true);
     return new Symbol(TokenConstants.BOOL_CONST, "true");
@@ -179,10 +180,7 @@ ALT_COMMENT_TEXT=(--[^\n]+)
     return new Symbol(TokenConstants.STR_CONST, table.addString(str));
 }
 <YYINITIAL> \"{STRING_TEXT} {
-    StringTable table = new StringTable();
-    String str =  yytext().substring(1,yytext().length());
-    assert(str.length() == yytext().length() - 1);
-    return new Symbol(TokenConstants.ERROR, table.addString("EOF in string constant"));
+    return new Symbol(TokenConstants.ERROR, "Unterminated string constant");
 } 
 
 <YYINITIAL>{DIGIT}+ { 
@@ -199,7 +197,6 @@ ALT_COMMENT_TEXT=(--[^\n]+)
     IdTable table = new IdTable();
     return new Symbol(TokenConstants.TYPEID, table.addString(yytext()));
 }
-
 
 . {     
     return new Symbol(TokenConstants.ERROR, yytext());
