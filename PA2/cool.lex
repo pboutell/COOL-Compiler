@@ -40,7 +40,7 @@ class StringConst
                 default: rStr.append(str.charAt(x)); break;
             }
         }
-        if (rStr.length() >= 1025) {
+        if (rStr.length() > 1024) {
             isError = true;
             return "String constant too long";
         }
@@ -200,12 +200,11 @@ ALT_COMMENT_TEXT=(--[^\n]+)
     StringConst parse = new StringConst();
     String str = parse.parse_string(yytext());
     
-    if (parse.isError == true) {
+    if (parse.isError == true) 
         return new Symbol(TokenConstants.ERROR, str);
-    }
-    else {
+    else 
         return new Symbol(TokenConstants.STR_CONST, table.addString(str));
-    }
+    
 }
 
 <YYINITIAL>{DIGIT}+ { 
