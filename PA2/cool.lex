@@ -11,33 +11,31 @@ class StringConst
     public Boolean isError;
 
     public String parse_string(String str) {
+        String nStr = str.substring(1, str.length()-1);
         StringBuilder rStr = new StringBuilder();
         isError = false;
         int x;
 
-        for (x=0; x<str.length(); ++x) {
-            switch (str.charAt(x)) {
+        for (x=0; x<nStr.length(); ++x) {
+            switch (nStr.charAt(x)) {
                 case '\n': isError = true; return "Unterminated string constant";
                 case '\0': isError = true; return "String contains null character";
+                        case '"': 
+                                isError = true; 
+                                return "EOF in string constant";
                 case '\\': 
-                    if (x+1 >= str.length()) break;
-                    switch (str.charAt(x+1)) {
+                    if (x+1 >= nStr.length()) break;
+                    switch (nStr.charAt(x+1)) {
                         case 'n':  rStr.append('\n'); break;
                         case 'b':  rStr.append('\b'); break;
                         case 'f':  rStr.append('\f'); break;
                         case 't':  rStr.append('\t'); break;
                         case '\0': isError = true; return "String contains escaped null character.";
-                        case '\"': {
-                            if (x+1 == str.length()-1) {
-                                isError = true; 
-                                return "EOF in string constant"; 
-                            }
-                        }
-                        default:   rStr.append(str.charAt(x+1)); break;
+                        default:   rStr.append(nStr.charAt(x+1)); break;
                     }
                     x++;
                     break;
-                default: rStr.append(str.charAt(x)); break;
+                default: rStr.append(nStr.charAt(x)); break;
             }
         }
         if (rStr.length() > 1024) {
@@ -114,7 +112,6 @@ class StringConst
 %cup
 %line
 %state COMMENT
-%state STRING
 
 ALPHA=[A-Za-z]
 DIGIT=[0-9]
@@ -186,16 +183,9 @@ ALT_COMMENT_TEXT=(--[^\n]+)
 }
 
 <YYINITIAL> {NONNEWLINE_WHITE_SPACE_CHAR}+ { }
-<YYINITIAL,COMMENT,STRING> \n { curr_lineno += 1; }
+<YYINITIAL,COMMENT> \n { curr_lineno += 1; }
 
-<YYINITIAL>\"\" { 
-    StringTable table = new StringTable();
-    return new Symbol(TokenConstants.STR_CONST, table.addString("")); 
-}
-<YYINITIAL>\" { yybegin(STRING); }
-<STRING>\"    { yybegin(YYINITIAL); }
-
-<STRING> {STRING_TEXT} {
+<YYINITIAL> \"{STRING_TEXT}\" {
     StringTable table = new StringTable();
     StringConst parse = new StringConst();
     String str = parse.parse_string(yytext());
@@ -207,6 +197,14 @@ ALT_COMMENT_TEXT=(--[^\n]+)
     
 }
 
+<YYINITIAL> \"(({STRING_TEXT})*)* {
+    return new Symbol(TokenConstants.ERROR, "EOF in string constant");
+}    
+<YYINITIAL> \"{STRING_TEXT} {
+    StringConst parse = new StringConst();
+    String str = parse.parse_string(yytext());
+    return new Symbol(TokenConstants.ERROR, str);
+}    
 <YYINITIAL>{DIGIT}+ { 
     IntTable table = new IntTable();
     return new Symbol(TokenConstants.INT_CONST, table.addString(yytext()));
