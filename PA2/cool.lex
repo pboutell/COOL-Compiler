@@ -20,9 +20,6 @@ class StringConst
             switch (nStr.charAt(x)) {
                 case '\n': isError = true; return "Unterminated string constant";
                 case '\0': isError = true; return "String contains null character";
-                        case '"': 
-                                isError = true; 
-                                return "EOF in string constant";
                 case '\\': 
                     if (x+1 >= nStr.length()) break;
                     switch (nStr.charAt(x+1)) {
