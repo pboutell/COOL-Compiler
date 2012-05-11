@@ -15,12 +15,12 @@ class FixString {
             if (nStr.charAt(x) == '\\' && (x+1 < nStr.length())) {
                 switch (nStr.charAt(x+1)) {
                     case 'n':  rStr.append('\n'); break;
+                    case '\n': rStr.append('\n'); break;
                     case 'b':  rStr.append('\b'); break;
                     case 'f':  rStr.append('\f'); break;
-                    case '\\': rStr.append('\\'); break;
                     case 't':  rStr.append('\t'); break;
+                    case '\\': rStr.append('\\'); break;
                     case '"':  rStr.append('"');  break;
-                    case '0':  rStr.append('0');  break;
                     default:   rStr.append(nStr.charAt(x+1)); break;
                 }
                 x++;
