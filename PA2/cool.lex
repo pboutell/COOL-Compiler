@@ -6,12 +6,18 @@ import java_cup.runtime.Symbol;
 import java.lang.String;
 import java.lang.StringBuilder;
 
-class FixString {
-    public static String parse_string(String str) {
+class StringConst 
+{
+    public Boolean isError;
+
+    public String parse_string(String str) {
         String nStr = str.substring(1, str.length()-1);
         StringBuilder rStr = new StringBuilder();
+        isError = false;
         int x;
+
         for (x=0; x<nStr.length(); ++x) {
+<<<<<<< HEAD
             if (nStr.charAt(x) == '\\' && (x+1 < nStr.length())) {
                 switch (nStr.charAt(x+1)) {
                     case 'n':  rStr.append('\n'); break;
@@ -27,7 +33,29 @@ class FixString {
             }
             else {
                 rStr.append(nStr.charAt(x));
+=======
+            switch (nStr.charAt(x)) {
+                case '\n': isError = true; return "Unterminated string constant";
+                case '\0': isError = true; return "String contains null character";
+                case '\\': 
+                    if (x+1 >= nStr.length()) break;
+                    switch (nStr.charAt(x+1)) {
+                        case 'n':  rStr.append('\n'); break;
+                        case 'b':  rStr.append('\b'); break;
+                        case 'f':  rStr.append('\f'); break;
+                        case 't':  rStr.append('\t'); break;
+                        case '\0': isError = true; return "String contains escaped null character.";
+                        default:   rStr.append(nStr.charAt(x+1)); break;
+                    }
+                    x++;
+                    break;
+                default: rStr.append(nStr.charAt(x)); break;
+>>>>>>> 09625e316574b9e06e4555b50856758f34966d48
             }
+        }
+        if (rStr.length() > 1024) {
+            isError = true;
+            return "String constant too long";
         }
         return rStr.toString();
     }
@@ -84,10 +112,10 @@ class FixString {
     switch(yy_lexical_state) {
         case YYINITIAL:
         /* nothing special to do in the initial state */
-        break;
-    case COMMENT:
-        yybegin(YYINITIAL);
-        return new Symbol(TokenConstants.ERROR, "EOF in comment");
+            break;
+        case COMMENT:
+            yybegin(YYINITIAL);
+            return new Symbol(TokenConstants.ERROR, "EOF in comment");
     }
     return new Symbol(TokenConstants.EOF);
 %eofval}
@@ -100,14 +128,12 @@ class FixString {
 %line
 %state COMMENT
 
-
 ALPHA=[A-Za-z]
 DIGIT=[0-9]
 NONNEWLINE_WHITE_SPACE_CHAR=[\ \t\f\v\b\r\013]
 STRING_TEXT=(\\.|[^\"])* 
 ALT_COMMENT_TEXT=(--[^\n]+)
 %%
-
 
 <YYINITIAL>"(*"|"--" { yybegin(COMMENT); c_count += 1; }
 <YYINITIAL>"*)" {
@@ -176,13 +202,24 @@ ALT_COMMENT_TEXT=(--[^\n]+)
 
 <YYINITIAL> \"{STRING_TEXT}\" {
     StringTable table = new StringTable();
-    String str = FixString.parse_string(yytext());
-    return new Symbol(TokenConstants.STR_CONST, table.addString(str));
+    StringConst parse = new StringConst();
+    String str = parse.parse_string(yytext());
+    
+    if (parse.isError == true) 
+        return new Symbol(TokenConstants.ERROR, str);
+    else 
+        return new Symbol(TokenConstants.STR_CONST, table.addString(str));
+    
 }
-<YYINITIAL> \"{STRING_TEXT} {
-    return new Symbol(TokenConstants.ERROR, "Unterminated string constant");
-} 
 
+<YYINITIAL> \"(({STRING_TEXT})*)* {
+    return new Symbol(TokenConstants.ERROR, "EOF in string constant");
+}    
+<YYINITIAL> \"{STRING_TEXT} {
+    StringConst parse = new StringConst();
+    String str = parse.parse_string(yytext());
+    return new Symbol(TokenConstants.ERROR, str);
+}    
 <YYINITIAL>{DIGIT}+ { 
     IntTable table = new IntTable();
     return new Symbol(TokenConstants.INT_CONST, table.addString(yytext()));
